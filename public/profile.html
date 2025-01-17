@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+
+<body>
+    <h1>Profile</h1>
+    <h2>Username: <span id="username"></span></h2>
+    <h2>Email: <span id="email"></span></h2>
+
+    <button id="logout">Logout</button>
+
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script>
+
+        const usuario = document.querySelector('#username')
+        const email = document.querySelector('#email')
+        const token = localStorage.getItem('token')
+        const logout = document.querySelector('#logout')
+
+        if (!token) {
+            window.location.href = "/login"
+        }
+		
+		// Decodificar el token para verificar el rol
+        const payload = JSON.parse(atob(token.split('.')[1])); // Decodifica la parte payload del token (Base64)
+        const userRole = payload.id_rol; // id_rol viene del token JWT
+
+        // Redirigir si es Superadmin
+        if (userRole === 2) { 
+            window.location.href = "/dashboard-superadmin";
+        }
+		
+        logout.addEventListener('click', () => {
+            localStorage.removeItem('token')
+            window.location.href = "/login"
+        })
+
+        axios.get('/api/v1/users/profile', {
+            headers: {
+                Authorization: `Bearer ${token}`
+            }
+        })
+            .then(({ data }) => {
+                usuario.textContent = data.msg.usuario
+                email.textContent = data.msg.email
+            })
+            .catch(e => console.log(e))
+    </script>
+
+</body>
+
+</html>
